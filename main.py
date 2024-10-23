@@ -6,10 +6,11 @@ from aiogram.filters.command import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram import F
 
+from quiz_data import quiz_data
+
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
 
-# Замените "YOUR_BOT_TOKEN" на токен, который вы получили от BotFather
 API_TOKEN = '7643506804:AAE4G9HLHbL65Y2ZVPKevYTDBadx0u9szkg'
 
 # Объект бота
@@ -21,38 +22,21 @@ dp = Dispatcher()
 DB_NAME = 'quiz_bot.db'
 
 
-# Структура квиза
-quiz_data = [
-    {
-        'question': 'Что такое Python?',
-        'options': ['Язык программирования', 'Тип данных', 'Музыкальный инструмент', 'Змея на английском'],
-        'correct_option': 0
-    },
-    {
-        'question': 'Какой тип данных используется для хранения целых чисел?',
-        'options': ['int', 'float', 'str', 'natural'],
-        'correct_option': 0
-    },
-    # Добавьте другие вопросы
-]
-
-
-
-def generate_options_keyboard(answer_options, right_answer):
+def generate_options_keyboard(answer_options, correct_answer):
     builder = InlineKeyboardBuilder()
 
     for option in answer_options:
         builder.add(types.InlineKeyboardButton(
             text=option,
-            callback_data="right_answer" if option == right_answer else "wrong_answer")
+            callback_data="correct_answer" if option == correct_answer else "wrong_answer")
         )
 
     builder.adjust(1)
     return builder.as_markup()
 
 
-@dp.callback_query(F.data == "right_answer")
-async def right_answer(callback: types.CallbackQuery):
+@dp.callback_query(F.data == "correct_answer")
+async def correct_answer(callback: types.CallbackQuery):
 
     await callback.bot.edit_message_reply_markup(
         chat_id=callback.from_user.id,
@@ -65,7 +49,6 @@ async def right_answer(callback: types.CallbackQuery):
     # Обновление номера текущего вопроса в базе данных
     current_question_index += 1
     await update_quiz_index(callback.from_user.id, current_question_index)
-
 
     if current_question_index < len(quiz_data):
         await get_question(callback.message, callback.from_user.id)
@@ -85,12 +68,12 @@ async def wrong_answer(callback: types.CallbackQuery):
     current_question_index = await get_quiz_index(callback.from_user.id)
     correct_option = quiz_data[current_question_index]['correct_option']
 
-    await callback.message.answer(f"Неправильно. Правильный ответ: {quiz_data[current_question_index]['options'][correct_option]}")
+    await callback.message.answer(f"Неправильно. Правильный ответ: "
+                                  f"{quiz_data[current_question_index]['options'][correct_option]}")
 
     # Обновление номера текущего вопроса в базе данных
     current_question_index += 1
     await update_quiz_index(callback.from_user.id, current_question_index)
-
 
     if current_question_index < len(quiz_data):
         await get_question(callback.message, callback.from_user.id)
@@ -124,8 +107,7 @@ async def new_quiz(message):
 
 
 async def get_quiz_index(user_id):
-     # Подключаемся к базе данных
-     async with aiosqlite.connect(DB_NAME) as db:
+    async with aiosqlite.connect(DB_NAME) as db:
         # Получаем запись для заданного пользователя
         async with db.execute('SELECT question_index FROM quiz_state WHERE user_id = (?)', (user_id, )) as cursor:
             # Возвращаем результат
@@ -146,13 +128,12 @@ async def update_quiz_index(user_id, index):
 
 
 # Хэндлер на команду /quiz
-@dp.message(F.text=="Начать игру")
+@dp.message(F.text == "Начать игру")
 @dp.message(Command("quiz"))
 async def cmd_quiz(message: types.Message):
 
     await message.answer(f"Давайте начнем квиз!")
     await new_quiz(message)
-
 
 
 async def create_table():
@@ -165,7 +146,6 @@ async def create_table():
 
 
 async def main():
-
     # Запускаем создание таблицы базы данных
     await create_table()
 
