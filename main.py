@@ -49,7 +49,6 @@ async def current_question_update(current_question_index, callback):
 @dp.callback_query(F.data == "right_answer")
 async def right_answer(callback: types.CallbackQuery):
 
-    await bot.send_message(text=callback.callback_data)
     await callback.message.answer("Верно!")
     current_question_index = await get_quiz_index(callback.from_user.id)
     # Обновление номера текущего вопроса в базе данных
