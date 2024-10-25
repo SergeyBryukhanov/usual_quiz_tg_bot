@@ -49,21 +49,20 @@ async def current_question_update(current_question_index, callback):
 @dp.callback_query(F.data == "right_answer")
 async def right_answer(callback: types.CallbackQuery):
 
-    await callback.message.answer("Верно!")
     current_question_index = await get_quiz_index(callback.from_user.id)
-    # Обновление номера текущего вопроса в базе данных
-    current_question_index += 1
-    await update_quiz_index(callback.from_user.id, current_question_index)
+
+    await callback.message.answer("Верно!")
+    await current_question_update(current_question_index, callback)
 
 
 @dp.callback_query(F.data == "wrong_answer")
 async def wrong_answer(callback: types.CallbackQuery):
 
-    # Получение текущего вопроса из словаря состояний пользователя
     current_question_index = await get_quiz_index(callback.from_user.id)
     correct_option = quiz_data[current_question_index]['correct_option']
 
     await callback.message.answer(f"Неправильно. Правильный ответ: {quiz_data[current_question_index]['options'][correct_option]}")
+    await current_question_update(current_question_index, callback)
 
 
 @dp.message(Command("start"))
@@ -101,7 +100,6 @@ async def cmd_quiz(message: types.Message):
 async def main():
     # Запускаем создание таблицы базы данных
     await create_table()
-
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
