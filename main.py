@@ -11,7 +11,7 @@ from db_methods import *
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
 
-API_TOKEN = '7643506804:AAE4G9HLHbL65Y2ZVPKevYTDBadx0u9szkg'
+API_TOKEN = '7313946831:AAGxPRX5mdM3ufimAeO_P0R1TI2MV9GfcSc'
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
