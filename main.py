@@ -45,6 +45,8 @@ async def db_update(current_question_index, callback, correct=False):
         await get_question(callback.message, callback.from_user.id)
     else:
         await callback.message.answer("Это был последний вопрос. Квиз завершен!")
+        rows = await get_user_score(callback.from_user.id)
+        await callback.message.answer("Ваш счет: {rows}/10".format(rows=rows))
 
 
 @dp.callback_query(lambda c: c.data.split("_")[1] == "1")
