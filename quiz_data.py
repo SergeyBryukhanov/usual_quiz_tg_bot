@@ -36,7 +36,17 @@ quiz_data = [
         'correct_option': 0
     },
     {
-        'question': 'Результатом вычисления print (25 // 3) будет число:',
+        'question': 'Что выведет print(["a", 1, None][True])?',
+        'options': ['a', '1', 'None', 'True'],
+        'correct_option': 1
+    },
+    {
+        'question': 'Результатом вычисления 5**3 будет число:',
+        'options': ['125', 'TypeError', '25', '15'],
+        'correct_option': 0
+    },
+    {
+        'question': 'Что выведет print (25 // 3)?',
         'options': ['8.3', 'TypeError', '8', '9'],
         'correct_option': 2
     }
